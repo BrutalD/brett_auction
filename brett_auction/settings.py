@@ -51,7 +51,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'AuctionSite.urls'
+ROOT_URLCONF = 'brett_auction.urls'
 
 TEMPLATES = [
     {
@@ -70,7 +70,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'AuctionSite.wsgi.application'
+WSGI_APPLICATION = 'brett_auction.wsgi.application'
 
 
 # Database

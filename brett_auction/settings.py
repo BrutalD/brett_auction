@@ -126,6 +126,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-MEDIA_ROOT = '/media_root/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MEDIA_URL = '/media/'
+
+# FILE_UPLOAD_PERMISSIONS = 0o644
+# FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o644

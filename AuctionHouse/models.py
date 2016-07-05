@@ -19,7 +19,7 @@ class User(models.Model):
         (FEMALE, 'Female'),
     )
     gender = models.CharField(max_length=20, choices=GENDER, default=MALE)
-    portrait = models.ImageField(upload_to='user_portrait/', blank=True, null=True)
+    portrait = models.ImageField(upload_to='user_portrait/')
     birthday = models.DateField(blank=True, null=True)
     phone = models.CharField(max_length=30)
     # 信用等级

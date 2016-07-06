@@ -1,35 +1,39 @@
 # -*-coding:utf-8-*-
 from django.shortcuts import render
 from django.shortcuts import render, render_to_response
-from django.http import HttpResponse, HttpResponseRedirect
-from django.template import RequestContext
+from django.http import *
+from django.core.exceptions import *
 from django.db.models import Q
 from .models import *
 from .forms import *
 from .utils import *
 # Create your views here.
 
+def pay(request):
+    pass
 
 def index(request):
     user_name = get_current_user(request)
-    return render_to_response('index.html', {'user_name':user_name})
+    # return render(request, 'index.html', {'user_name':user_name})
+    return HttpResponseRedirect('/market/')
 
 # 用户注册
 def register(request):
     # print('POST')
 
     if request.method == 'POST':
-        user_form = UserForm(request.POST)
+        user_form = RegisterUserForm(request.POST)
         if user_form.is_valid():
             new_user = User(**user_form.cleaned_data)
             new_user.save()
-            return render_to_response('register/success.html',
-                                      {'username':user_form.cleaned_data['user_name']})
+            return render(request,
+                          'register/success.html',
+                          {'username':user_form.cleaned_data['user_name']})
     else:
-        user_form = UserForm()
-    return render_to_response('register/register.html',
-                              {'uf':user_form},
-                              context_instance=RequestContext(request))
+        user_form = RegisterUserForm()
+    return render(request,
+                  'register/register.html',
+                  {'uf':user_form})
 
 def login(request):
     if request.method == 'POST':
@@ -54,78 +58,234 @@ def login(request):
                 return HttpResponseRedirect('/login/')
     else:
         user_form = LoginUserForm()
-    return render_to_response('login/login.html',
-                              {'uf':user_form},
-                              context_instance=RequestContext(request))
+    return render(request,
+                  'login/login.html',
+                 {'uf':user_form})
 
-
-# 用户能看到的自身状态
 def user(request, user_name):
 
     # 获取当前登陆的用户
-    current_user = get_current_user(request)
+    try:
+        current_user = get_current_user(request)
+    except ObjectDoesNotExist as e:
+        current_user = ''
 
     # 如果是当前登陆的用户在查看自身的状态
     if current_user == user_name:
-        user_status = User.objects.filter(user_name=user_name)[0]
+        user = User.objects.get(user_name=current_user)
         if request.method == 'POST':
-            # request.POST对象是一个QueryDict类型的对象，
-            # 是一个单键可能对应多值的字典（实际上就是值都是包含在列表中的的）
-            # 兼容字典的绝大多数方法
-            # QueryDict.items()返回的值依然是单值（是通过__getitem__这个单值逻辑实现的）
-            update_user_status = request.POST
-            tmp_user_form = ShowUserForm(request.POST, request.FILES)
-            if tmp_user_form.is_valid():
-                for key, value in tmp_user_form.cleaned_data.items():
-                    if value == '':
-                        value = None
-                    if hasattr(user_status, key):
-                        setattr(user_status, key, value)
-            # for key, value in update_user_status.items():
-            #     # 如果form提交的时候文本框中没有值，那么value为''
-            #     # 在数据库中存入一个空字符串是不合理的，也有可能出错（例如日期）
-            #     # 需要转化成null，即Python中的None
-            #     if value == '':
-            #         value = None
-            #     # 如果User对象没有这个属性，就不要更改这个属性
-            #     if hasattr(user_status, key):
-            #         setattr(user_status, key, value)
-            # 真正地更改用户信息
-            user_status.save()
-
-        show_user_status = ShowUserForm(initial=user_status.__dict__, )
-        return render_to_response('people/self.html',
-                                  {'uf':show_user_status},
-                                  context_instance=RequestContext(request))
+            user_form = UpdateUserForm(request.POST, request.FILES, instance=user)
+            user_form.save()
+        else:
+            user_form = UpdateUserForm(instance=user)
+        return render('people/self.html',
+                      {'uf': user_form})
     else:
-        return render_to_response('people/other.html',
-                                   context_instance=RequestContext(request))
+        try:
+            user = User.objects.get(user_name=user_name)
+        except:
+            return HttpResponseNotFound('404 Not Found.')
 
-
+        return render(request,
+                      'people/other.html',
+                      {'user': user})
 
 # 注意，一个用户是不能看其他用户的购物车的。
 # 所以，不需要在购物车之前指明用户
 # 而是应该根据session和cookie判断当前登陆的用户
 # 订单等等同理
-def orders(request):
+def orders(request, order_status=None):
     current_user = get_current_user(request)
-    pass
+    try:
+        current_user_obj = User.objects.get(user_name=current_user)
+    except ObjectDoesNotExist as e:
+        return render(request, 'error.html', {'error': e})
+    order_list = Order.objects.filter(user=current_user_obj).order_by('start_time')
+    if order_status:
+        order_list = order_list.filter(status=order_status.uppper())
 
-def bids(request):
-    pass
+    context = {'orders': order_list,
+               'order_status': order_status}
 
-def orders_unpaid(request):
-    pass
+    return render(request, 'order/order.html', context)
 
-def orders_unsent(request):
-    pass
 
-def orders_unconfirmed(request):
-    pass
 
 def cart(request):
-    pass
+    current_user = get_current_user(request)
+    if not current_user:
+        return HttpResponseRedirect('/login/')
+
+    user_obj = User.objects.get(user_name=current_user)
+    user_s_cart = Cart.objects.filter(user=user_obj).order_
+    context = {'cart': user_s_cart}
+
+    return render(request, 'people/cart.html', context)
 
 def market(request):
-    pass
+    current_user = get_current_user(request)
+    categories = Category.objects.all()
+    # to fill
+    context = {'current_user': current_user,
+                     'categories': categories}
+    return render(request, 'market/index.html',context)
 
+def cate_market(request, category_name):
+    current_user = get_current_user(request)
+    category_obj = Category.objects.get(pk=category_name)
+    context = {'current_user': current_user,
+               'categori': category_obj}
+    return render(request, 'market/category.html', context)
+
+def goods_upload(request):
+    current_user = get_current_user(request)
+    if current_user == '':
+        return HttpResponseRedirect('/login/')
+
+    if request.method == 'POST':
+        upload_goods = UploadGoodsForm(request.POST, request.FILES)
+        if upload_goods.is_valid():
+            new_goods = upload_goods.save(commit=False)
+            new_goods.vendor = User.objects.get(user_name=current_user)
+            if new_goods.start_bid and not new_goods.buy_it_now_price:
+                new_goods.current_bid = new_goods.start_bid
+                new_goods.sale_type = 'OA'
+            elif new_goods.start_bid and new_goods.buy_it_now_price:
+                new_goods.current_bid = new_goods.start_bid
+                new_goods.sale_type = 'PB'
+            elif not new_goods.start_bid and new_goods.buy_it_now_price:
+                new_goods.sale_type = 'OB'
+            else:
+                return render(request, 'goods/upload.html',
+                                          {'gf': upload_goods,
+                                           'err_msg': '商品没有价格！'})
+
+            new_goods.save()
+            context = {}
+            return render(request,'goods/uploadsuccess.html', context)
+        return render(request,
+                      'goods/upload.html',
+                      {'gf': upload_goods,
+                       'err_msg': '商品信息有误！'})
+    else:
+        upload_goods = UploadGoodsForm()
+        return render(request,
+                      'goods/upload.html',
+                      {'gf': upload_goods})
+
+def goods(request, goods_id, action=None):
+    try:
+        current_user = get_current_user(request)
+    except ObjectDoesNotExist as e:
+        current_user = None
+    try:
+        items = Goods.objects.get(pk=goods_id)
+    except ObjectDoesNotExist as e:
+        return render(request, 'error.html', {'error': e})
+    context = {'goods': items}
+    if action == None:
+        return render(request, 'goods.html', context)
+    elif action == 'addcart':
+        addcart(request, current_user, goods_id)
+    elif action == 'buynow':
+        buynow(request, current_user, goods_id)
+    elif action == 'auction':
+        auction(request, current_user, goods_id)
+
+
+def addcart(request, goods_id):
+    current_user = get_current_user(request)
+    #current_user转化成User对象
+    user_obj = User.objects.get(user_name=current_user)
+    if request.method == 'POST':
+        # 要求加入购物车的POST要有这个表单
+        item_count = request.POST['item_count']
+        item_obj = Goods.objects.get(pk=goods_id)
+        remaining = item_obj.remaining_number
+        if remaining < item_count:
+            # TO DO add an exception handler
+            pass
+        else:
+            try:
+                cart_item_obj = Cart.objects.get(user=user_obj, goods=item_obj)
+                cart_item_obj.number += item_count
+                cart_item_obj.save()
+            except ObjectDoesNotExist as e:
+                cart_item_obj = Cart(user=user_obj, goods=item_count, number=item_count)
+                cart_item_obj.save()
+        context = {'user': current_user,
+                   'goods': item_obj,
+                   'item_count': item_count}
+        return render(request, 'addcart_success.html', context)
+    return render(request, 'nothing_to_add.html')
+
+
+# 实际上就是加入订单
+def buynow(request, goods_id):
+    current_user = get_current_user(request)
+
+    user_obj = User.objects.get(user_name=current_user)
+    item_obj = User.objects.get(goods_id=goods_id)
+    if request.method == 'POST':
+        item_count = request.POST['item_count']
+        # 在前面做好物品数量要大于剩余数量的校验，在这里就不做校验了
+        new_order = Order(user=user_obj, goods=item_obj, number=item_count)
+        new_order.save()
+        item_obj.remaining_number -= item_count
+        item_obj.save()
+        # 加入订单后转入到所有订单页面
+        # 可以试试用session传递参数
+        HttpResponseRedirect('/orders/unpaid')
+
+def auction(request, goods_id):
+    current_user = get_current_user(request)
+
+    user_obj = User.objects.get(user_name=current_user)
+    item_obj = User.objects.get(goods_id=goods_id)
+    if request.method == 'POST':
+        bid = request.POST['bid']
+        current_bid = item_obj.current_bid
+        if bid <= current_bid:
+            return HttpResponseRedirect('/goods/%s' % goods_id)
+        else:
+            item_obj.current_bid = bid
+            item_obj.current_bid_buyer = user_obj
+            item_obj.save()
+            # 如果没有买家出价的记录，就新建，否则就更新。
+            try:
+                auction_record = AuctionBid.objects.get(goods=item_obj, user=user_obj)
+                auction_record.user_bid = bid
+            except ObjectDoesNotExist as e:
+                auction_record = AuctionBid(goods=item_obj, user=user_obj, user_bid=bid)
+            auction_record.save()
+
+# 查看一个用户的拍卖纪录
+def bids(request):
+    current_user = get_current_user(request)
+    if not current_user:
+        HttpResponseRedirect('/login/')
+    user_obj = User.objects.get(user_name=current_user)
+    auction_list = AuctionBid.objects.filter(user=user_obj)
+    context = {'auction_list': auction_list}
+
+    return render(request, 'people/auction_record.html', context)
+
+def address(request):
+    current_user = get_current_user(request)
+    if not current_user:
+        HttpResponseRedirect('/login/')
+    user_obj = User.objects.get(user_name=current_user)
+    address_list = DeliveryAddress.objects.filter(user=user_obj)
+
+    if request.method == 'POST':
+        address_form = AddressForm(request.POST)
+        if address_form.is_valid():
+            address_form.user = user_obj
+            address_form.save()
+            return HttpResponseRedirect('/people/address')
+        else:
+            return HttpResponseRedirect('/people/address')
+
+    context = {'address_list': address_list,
+               'current_user': current_user}
+    return render(request, 'people/address.html', context)

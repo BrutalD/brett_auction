@@ -5,7 +5,7 @@ from django.db import models
 
 class User(models.Model):
     # user_id = models.CharField(max_length=36, primary_key=True)
-    user_name = models.CharField(max_length=30)
+    user_name = models.CharField(max_length=30, unique=True)
     email = models.EmailField()
     password = models.CharField(max_length=255)
     real_name = models.CharField(max_length=30)
@@ -25,9 +25,10 @@ class User(models.Model):
     # 信用等级
     credit = models.FloatField(default=0)
 
+
 class DeliveryAddress(models.Model):
     # address_id = models.CharField(max_length=36, primary_key=True)
-    user_id = models.ForeignKey(User)
+    user = models.ForeignKey(User)
     delivery_phone = models.CharField(max_length=30)
     delivery_name = models.CharField(max_length=30)
     address = models.CharField(max_length=255)
@@ -39,7 +40,8 @@ class Goods(models.Model):
     remaining_number = models.PositiveIntegerField()
     goods_name = models.CharField(max_length=255)
     description = models.TextField()
-    category = models.CharField(max_length=255, blank=True, null=True)
+    category = models.ForeignKey(Category, on_delete=None, related_name='goods_category')
+    # category = models.CharField(max_length=255, blank=True, null=True)
 
     ON_SALE = 'ON'
     OFF_SHELVES = 'OFF'
@@ -89,16 +91,24 @@ class Cart(models.Model):
 class Order(models.Model):
     goods = models.ForeignKey(Goods)
     user = models.ForeignKey(User)
+    number = models.PositiveSmallIntegerField()
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
 
     DONE = 'DONE'
-    DOING = 'DOING'
-    ABORTED = "AB"
+    UNPAID = 'UNPAID'
+    UNSENT = 'UNSENT'
+    UNCONFIRMED = 'UNCONFIRMED'
+    ABORTED = 'ABORTED'
     ORDER_STATUS = (
         (DONE, '交易完成'),
-        (DOING, '正在进行'),
+        (UNPAID, '等待付款'),
         (ABORTED, '交易关闭'),
+        (UNCONFIRMED, '等待确认'),
+        (UNSENT, '等待发货'),
     )
-    status = models.CharField(max_length=20, choices=ORDER_STATUS, default=DOING)
+    status = models.CharField(max_length=20, choices=ORDER_STATUS, default=UNPAID)
 
+
+class Category(models.Model):
+    category = models.CharField(max_length=20, primary_key=True)

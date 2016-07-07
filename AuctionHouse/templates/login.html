@@ -66,7 +66,23 @@
 						<div class="mainmenu pull-left">
 							<ul class="nav navbar-nav collapse navbar-collapse">
 								<li><a href="/market">商店</a></li>
-                                <li><a href="/upload/" class="active">上传商品</a></li>
+
+                                <!--<li class="dropdown"><a href="#">Shop<i class="fa fa-angle-down"></i></a>
+                                    <ul role="menu" class="sub-menu">
+                                        <li><a href="market.html">Products</a></li>
+										<li><a href="product-details.html">Product Details</a></li>
+										<li><a href="checkout.html">Checkout</a></li>
+										<li><a href="cart.html">Cart</a></li>
+										<li><a href="login.html">Login</a></li>
+                                    </ul>
+                                </li>
+								<li class="dropdown"><a href="#">Blog<i class="fa fa-angle-down"></i></a>
+                                    <ul role="menu" class="sub-menu">
+                                        <li><a href="blog.html">Blog List</a></li>
+										<li><a href="blog-single.html">Blog Single</a></li>
+                                    </ul>
+                                </li>-->
+                                <li><a href="/upload/">上传商品</a></li>
                                 <li><a href="/orders/">订单</a></li>
                                 <li><a href="/cart/">购物车</a></li>
                                 <li><a href="/people/{{ current_user }}" >个人中心</a></li>
@@ -83,74 +99,42 @@
 		</div><!--/header-bottom-->
 	</header><!--/header-->
 
-    <div id="contact-page" class="container">
-    	<div class="bg">
-    		<div class="row">
-	    		<div class="col-sm-8">
-	    			<div class="contact-form">
-	    				<h2 class="title text-center">商品资料</h2>
-	    				<div class="status alert alert-success" style="display: none"></div>
-				    	<form id="main-user-profile-form" class="contact-form row" name="user-profile-form" method="post" enctype="multipart/form-data"> {% csrf_token %}
-				            <div class="form-group col-md-8">
-				                <input type="text" name="goods_name" class="form-control"  placeholder="商品名称" required="required">
-				            </div>
-                            <div class="form-group col-md-4">
-				                <input type="text" name="remaining_number" class="form-control"  placeholder="商品数量" required="required">
-				            </div>
-				            <div class="form-group col-md-12">
-                                <textarea name="description" id="message" required="required" class="form-control" rows="8" placeholder="商品描述"></textarea>
-				            </div>
-				            <div class="form-group col-md-6">
-				                <input type="text" name="start_bid" class="form-control"  placeholder="起拍价">
-				            </div>
-                            <div class="form-group col-md-6">
-				                <input type="text" name="buy_it_now_price" class="form-control"  placeholder="一口价">
-				            </div>
-                            <div class="form-group col-md-6">
-                                <select id="id_category" name="category">
-                                    <option value="" selected="selected">---------</option>
-                                    {% for category in categories %}
-                                    <option value={{ category }}>{{ category }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label>图片描述</label>
-                                <input type="file" name="image_description" required="required">
-                            </div>
+	<section id="form"><!--form-->
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-4 col-sm-offset-1">
+					<div class="login-form"><!--login form-->
+						<h2>老用户登录</h2>
 
-				            <!--<div class="form-group col-md-12">
-				                <textarea name="message" id="message" required="required" class="form-control" rows="8" placeholder="自我介绍"></textarea>
-				            </div>-->
-				            <div class="form-group col-md-12">
-				                <input type="submit" name="submit" class="btn btn-primary pull-right" value="提交">
-				            </div>
-				        </form>
-	    			</div>
-	    		</div>
-	    		<div class="col-sm-4">
-	    			<div class="contact-info">
-	    				<h2 class="title text-center">用户资料</h2>
-	    				<address>
-	    					<p>用户名：{{ current_user.user_name }}</p>
-							<p>电子邮箱：{{ current_user.email }}</p>
-							<p>手机号码：{{ current_user.phone }}</p>
-							<p>真实姓名：{{ current_user.real_name }}</p>
-							<p>证件号：{{ current_user.real_id }}</p>
-	    				</address>
-	    			</div>
-    			</div>
-	    	</div>
-    	</div>
-		<div class="common-modal modal fade" id="common-Modal1" tabindex="-1" role="dialog" aria-hidden="true">
-			<div class="modal-content">
-				<ul class="list-inline item-details">
-					<li><a href="http://themifycloud.com">Ecommerce templates</a></li>
-					<li><a href="http://themescloud.org">Ecommerce themes</a></li>
-				</ul>
+						<form name="signin-form" method="post"> {% csrf_token %}
+                            <p style="color:red">{{ error_msg }}</p>
+							<input type="text" name="login_name_email" placeholder="用户名/邮箱" required="required"/>
+							<input type="password" name="login_password" placeholder="密码" required="required"/>
+
+							<button type="submit" name="login" class="btn btn-default">登录</button>
+						</form>
+					</div><!--/login form-->
+				</div>
+				<div class="col-sm-1">
+					<h2 class="or">OR</h2>
+				</div>
+				<div class="col-sm-4">
+					<div class="signup-form"><!--sign up form-->
+						<h2>新用户注册！</h2>
+						<form name="signin-form" method="post"> {% csrf_token %}
+                            <p style="color:red">{{ register_error_msg }}</p>
+							<input type="text" name="user_name" placeholder="用户名" required="required"/>
+							<input type="email" name="email" placeholder="邮箱" required="required"/>
+							<input type="password" name="password" placeholder="密码" required="required"/>
+                            <input type="text" name="real_name" placeholder="真实姓名" required="required"/>
+                            <input type="text" name="real_id" placeholder="证件号" required="required"/>
+							<button type="submit" name="register" class="btn btn-default">注册</button>
+						</form>
+					</div><!--/sign up form-->
+				</div>
 			</div>
 		</div>
-    </div><!--/#contact-page-->
+	</section><!--/form-->
 
     <script src="/js/jquery.js"></script>
 	<script src="/js/bootstrap.min.js"></script>

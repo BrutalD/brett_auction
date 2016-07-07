@@ -151,14 +151,15 @@
                         <h2 class="title text-center">收货地址</h2>
                         {% for address in current_user.deliveryaddress_set.all %}
                         <address>
-                            <p>收件人：{{ address.delievery_name }}</p>
-                            <p>联系电话：{{ address.delievery_phone }}</p>
+                            <p>收件人：{{ address.delivery_name }}</p>
+                            <p>联系电话：{{ address.delivery_phone }}</p>
                             <p>邮编: {{ address.postcode }}</p>
                             <p>地址：{{ address.address }}</p>
                         </address>
                         {% endfor %}
                         <div class="form-group col-md-12">
-                            <a href="/newaddress/"><<input type="button"
+                            <a href="/newaddress/">
+                                <input type="button"
                                    onclick="window.location.href('/newaddress/')" name="new-address" class="btn btn-primary pull-right" value="新地址">
                             </a>
                         </div>

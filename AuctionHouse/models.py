@@ -7,7 +7,7 @@ class User(models.Model):
     # user_id = models.CharField(max_length=36, primary_key=True)
     user_name = models.CharField(max_length=30, unique=True)
     email = models.EmailField()
-    password = models.CharField(max_length=255)
+    password = models.CharField(max_length=40)
     real_name = models.CharField(max_length=30)
     real_id = models.CharField(max_length=30)
 
@@ -39,7 +39,7 @@ class DeliveryAddress(models.Model):
     postcode = models.CharField(max_length=30)
 
     def __str__(self):
-        return '%s\n%s\n%s' % (self.delivery_name, self.delivery_phone, self.address)
+        return '%s+%s' % (self.delivery_name,self.address[:8])
 
 class Category(models.Model):
     category = models.CharField(max_length=20, primary_key=True)
@@ -80,11 +80,11 @@ class Goods(models.Model):
     # 根据商品的各自价格，将商品分为仅拍卖、拍卖或一口价、仅一口价三种。
     # 但是，数量为多个的商品是不能拍卖的。（除非成组拍卖，但是成组拍卖的时候算作一个商品）
 
-    image_description = models.ImageField(upload_to='goods_image/%Y/%m/%d', blank=True, null=True)
-    image_description_2 = models.ImageField(upload_to='goods_image/%Y/%m/%d', blank=True, null=True)
-    image_description_3 = models.ImageField(upload_to='goods_image/%Y/%m/%d', blank=True, null=True)
-    image_description_4 = models.ImageField(upload_to='goods_image/%Y/%m/%d', blank=True, null=True)
-    image_description_5 = models.ImageField(upload_to='goods_image/%Y/%m/%d', blank=True, null=True)
+    image_description = models.ImageField(upload_to='goods_image/', blank=True, null=True)
+    image_description_2 = models.ImageField(upload_to='goods_image/', blank=True, null=True)
+    image_description_3 = models.ImageField(upload_to='goods_image/', blank=True, null=True)
+    image_description_4 = models.ImageField(upload_to='goods_image/', blank=True, null=True)
+    image_description_5 = models.ImageField(upload_to='goods_image/', blank=True, null=True)
 
     def __str__(self):
         return self.goods_name
@@ -107,6 +107,7 @@ class Order(models.Model):
     goods = models.ForeignKey(Goods)
     user = models.ForeignKey(User)
     number = models.PositiveSmallIntegerField()
+    address = models.ForeignKey(DeliveryAddress, blank=True, null=True)
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
 

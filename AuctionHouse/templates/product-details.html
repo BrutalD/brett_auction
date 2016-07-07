@@ -16,7 +16,7 @@
     <!--[if lt IE 9]>
     <script src="js/html5shiv.js"></script>
     <script src="js/respond.min.js"></script>
-    <![endif]-->       
+    <![endif]-->
     <link rel="shortcut icon" href="/images/ico/favicon.ico">
     <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/ico/apple-touch-icon-144-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/ico/apple-touch-icon-114-precomposed.png">
@@ -26,7 +26,7 @@
 
 <body>
 	<header id="header"><!--header-->
-		
+
 		<div class="header-middle"><!--header-middle-->
 			<div class="container">
 				<div class="row">
@@ -50,7 +50,7 @@
 				</div>
 			</div>
 		</div><!--/header-middle-->
-	
+
 		<div class="header-bottom"><!--header-bottom-->
 			<div class="container">
 				<div class="row">
@@ -100,41 +100,81 @@
                             {% endfor %}
 						</div><!--/category-products-->
 
-					
+
 					</div>
 				</div>
-				
-				<div class="col-sm-9 padding-right">
-					<div class="features_items"><!--features_items-->
-						<h2 class="title text-center">特色物品</h2>
 
-                        {% for category in categories %}
-                            {% for item in category.category_goods.all %}
-						<div class="col-sm-4">
-							<div class="product-image-wrapper">
-								<div class="single-products">
-										<div class="productinfo text-center">
-											<img src= "/media/{{ item.image_description_2 }}" />
-											<h2>RMB {{ item.buy_it_now_price }}</h2>
-                                            <!--Change the text and herf-->
-											<p>{{ item.goods_name }}</p>
-                                            <a href="/goods/{{ item.id }}" class="btn btn-default add-to-cart"><i class="fa fa-smile-o"></i>查看商品</a>
-										</div>
-										<div class="product-overlay">
-											<div class="overlay-content">
-												<h2>RMB {{ item.buy_it_now_price }}</h2>
-												<p>{{ item.goods_name }}</p>
-												<a href="/goods/{{ item.id }}" class="btn btn-default add-to-cart"><i class="fa fa-smile-o"></i>查看商品</a>
-											</div>
-										</div>
-								</div>
+				<div class="col-sm-9 padding-right">
+					<div class="product-details"><!--product-details-->
+						<div class="col-sm-5">
+							<div class="view-product">
+								<img src="/media/{{ goods.image_description_3 }}" alt="" />
 							</div>
 						</div>
-                            {% endfor %}
-                        {% endfor %}
-						
-					</div><!--features_items-->
+						<div class="col-sm-7">
+							<div class="product-information"><!--/product-information-->
+								<h2>{{ goods.goods_name }}</h2>
+								<p>Web ID: {{ goods.id }}</p>
+                                <form method="post"> {% csrf_token %}
+                                    <span>
+                                        <span>一口价: {{ goods.buy_it_now_price }}</span>
+                                        <label>数量：</label>
+                                        <input type="text" name="item_count" value="1"/>
+                                        <button type="submit" class="btn btn-fefault cart pull-right" name="addcart">
+										    <i class="fa fa-shopping-cart"></i>
+										    加入购物车
+									    </button>
+                                        <button type="submit" class="btn btn-fefault cart pull-right" name="buy_now">
+										    <i class="fa fa-shopping-cart"></i>
+										    现在购买
+									    </button>
+                                    </span>
+                                </form>
+
+                                <form method="post"> {% csrf_token %}
+                                    <span>
+                                        <span>拍卖价: {% if goods.current_bid %} {{ goods.current_bid }} {% else %} ??? {% endif %}</span>
+                                        <label>出价：</label>
+                                        <input type="text" name="bid" value="{% widthratio goods.current_bid 100 105 %}"/>
+                                        <button type="submit" class="btn btn-fefault cart pull-right" name="auction_bid">
+										    <i class="fa fa-shopping-cart"></i>
+										    竞标
+									    </button>
+                                    </span>
+                                </form>
+
+								<!--<span>
+									<span>拍卖价：RMB {% if goods.current_bid %} {{ goods.current_bid }} {% else %} ??? {% endif %}</span>
+                                    <span>一口价：RMB {{ goods.buy_it_now_price }}</span>
+                                    <form method="post">{% csrf_token %}
+                                        <span><label>数量</label>
+                                    <input title="数量" type="text" value="1" />
+                                        <button type="button" href="/goods/{{ goods.id }}/addcart" class="btn btn-fefault cart">
+										<i class="fa fa-shopping-cart"></i>
+										加入购物车
+									    </button></span>
+                                    </form>
+
+                                    <form method="post">{% csrf_token %}
+									<span><label>您的出价</label><input title="您的出价" type="text" value="{% widthratio goods.current_bid 100 105 %}" />
+                                        <button type="submit"  class="btn btn-fefault cart">
+										<i class="fa fa-shopping-cart"></i>
+										竞标
+                                        </button></span>
+                                    </form>
+
+								<span>
+								-->
+                                    <p><b>有货？:</b> {% if goods.status == 'ON' %}有货{% else %}缺货{% endif %}</p>
+								<p><b>剩余数量: </b> {{ goods.remaining_number }}</p>
+								<p><b>卖家:</b> {{ goods.vendor.user_name }}</p></span>
+
+								<a href=""><img src="images/product-details/share.png" class="share img-responsive"  alt="" /></a>
+							</div><!--/product-information-->
+						</div>
+					</div><!--/product-details-->
 				</div>
+
 			</div>
 		</div>
 		<div class="common-modal modal fade" id="common-Modal1" tabindex="-1" role="dialog" aria-hidden="true">
@@ -146,7 +186,7 @@
 			</div>
 		</div>
 	</section>
-  
+
     <script src="/js/jquery.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
 	<script src="/js/jquery.scrollUp.min.js"></script>

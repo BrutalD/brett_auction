@@ -69,7 +69,7 @@ class UpdateUserForm(ModelForm):
 class UploadGoodsForm(ModelForm):
     class Meta:
         model = Goods
-        fields = ['goods_name', 'remaining_number', 'description', 'start_bid', 'buy_it_now_price', 'image_description']
+        fields = ['goods_name', 'remaining_number', 'description', 'start_bid', 'buy_it_now_price', 'image_description', 'category']
         labels = {'goods_name': '商品名',
                   'remaining_number': '数量',
                   'description': '描述',
@@ -78,11 +78,19 @@ class UploadGoodsForm(ModelForm):
                   'image_description': '上传图片'}
         widgets = {'description': Textarea(attrs={'cols': 60, 'rows': 8})}
 
-class AddressForm(ModelForm):
+class AddressForm(Form):
+    delivery_phone = CharField(max_length=30)
+    delivery_name = CharField(max_length=30)
+    address = CharField(max_length=255)
+    postcode = CharField(max_length=30)
+
+class AddCartForm(Form):
+    item_count = IntegerField()
+
+class AuctionBidForm(Form):
+    bid = IntegerField()
+
+class AddressChooseForm(ModelForm):
     class Meta:
-        model = DeliveryAddress
-        fields = ['delivery_name', 'delivery_phone', 'address', 'postcode']
-        labels = {'delivery_name': '收件人名',
-                  'delivery_phone': '联系电话',
-                  'address': '详细地址',
-                  'postcode': '邮编',}
+        model = Order
+        fields = ['address']

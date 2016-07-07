@@ -65,11 +65,11 @@
 						</div>
 						<div class="mainmenu pull-left">
 							<ul class="nav navbar-nav collapse navbar-collapse">
-								<li><a href="/market">商店</a></li>
-                                <li><a href="/upload/" class="active">上传商品</a></li>
+								<li><a href="/market" class="active">商店</a></li>
+                                <li><a href="/upload/">上传商品</a></li>
                                 <li><a href="/orders/">订单</a></li>
                                 <li><a href="/cart/">购物车</a></li>
-                                <li><a href="/people/{{ current_user }}" >个人中心</a></li>
+                                <li><a href="/people/{{ current_user }}">个人中心</a></li>
 							</ul>
 						</div>
 					</div>
@@ -83,74 +83,71 @@
 		</div><!--/header-bottom-->
 	</header><!--/header-->
 
-    <div id="contact-page" class="container">
-    	<div class="bg">
-    		<div class="row">
-	    		<div class="col-sm-8">
-	    			<div class="contact-form">
-	    				<h2 class="title text-center">商品资料</h2>
-	    				<div class="status alert alert-success" style="display: none"></div>
-				    	<form id="main-user-profile-form" class="contact-form row" name="user-profile-form" method="post" enctype="multipart/form-data"> {% csrf_token %}
-				            <div class="form-group col-md-8">
-				                <input type="text" name="goods_name" class="form-control"  placeholder="商品名称" required="required">
-				            </div>
-                            <div class="form-group col-md-4">
-				                <input type="text" name="remaining_number" class="form-control"  placeholder="商品数量" required="required">
-				            </div>
-				            <div class="form-group col-md-12">
-                                <textarea name="description" id="message" required="required" class="form-control" rows="8" placeholder="商品描述"></textarea>
-				            </div>
-				            <div class="form-group col-md-6">
-				                <input type="text" name="start_bid" class="form-control"  placeholder="起拍价">
-				            </div>
-                            <div class="form-group col-md-6">
-				                <input type="text" name="buy_it_now_price" class="form-control"  placeholder="一口价">
-				            </div>
-                            <div class="form-group col-md-6">
-                                <select id="id_category" name="category">
-                                    <option value="" selected="selected">---------</option>
-                                    {% for category in categories %}
-                                    <option value={{ category }}>{{ category }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label>图片描述</label>
-                                <input type="file" name="image_description" required="required">
-                            </div>
+	<section>
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-3">
+					<div class="left-sidebar">
+						<h2>分类</h2>
+						<div class="panel-group category-products" id="accordian"><!--category-productsr-->
 
-				            <!--<div class="form-group col-md-12">
-				                <textarea name="message" id="message" required="required" class="form-control" rows="8" placeholder="自我介绍"></textarea>
-				            </div>-->
-				            <div class="form-group col-md-12">
-				                <input type="submit" name="submit" class="btn btn-primary pull-right" value="提交">
-				            </div>
-				        </form>
-	    			</div>
-	    		</div>
-	    		<div class="col-sm-4">
-	    			<div class="contact-info">
-	    				<h2 class="title text-center">用户资料</h2>
-	    				<address>
-	    					<p>用户名：{{ current_user.user_name }}</p>
-							<p>电子邮箱：{{ current_user.email }}</p>
-							<p>手机号码：{{ current_user.phone }}</p>
-							<p>真实姓名：{{ current_user.real_name }}</p>
-							<p>证件号：{{ current_user.real_id }}</p>
-	    				</address>
-	    			</div>
-    			</div>
-	    	</div>
-    	</div>
+                            {% for a_category in categories %}
+                            <div class="panel panel-default">
+								<div class="panel-heading">
+                                    {% if a_category == category %}
+									    <h4 class="panel-title" style="color:sandybrown"><a href="/market/{{ a_category }}">{{ a_category }}</a></h4>
+                                    {% else %}
+                                        <h4 class="panel-title"><a href="/market/{{ a_category }}">{{ a_category }}</a></h4>
+                                    {% endif %}
+								</div>
+							</div>
+                            {% endfor %}
+						</div><!--/category-products-->
+
+
+					</div>
+				</div>
+
+				<div class="col-sm-9 padding-right">
+					<div class="features_items"><!--features_items-->
+						<h2 class="title text-center">特色物品</h2>
+
+                            {% for item in category.category_goods.all %}
+						<div class="col-sm-4">
+							<div class="product-image-wrapper">
+								<div class="single-products">
+										<div class="productinfo text-center">
+											<img src= "/media/{{ item.image_description_2 }}" />
+											<h2>RMB {{ item.buy_it_now_price }}</h2>
+                                            <!--Change the text and herf-->
+											<p>{{ item.goods_name }}</p>
+                                            <a href="/goods/{{ item.id }}" class="btn btn-default add-to-cart"><i class="fa fa-smile-o"></i>查看商品</a>
+										</div>
+										<div class="product-overlay">
+											<div class="overlay-content">
+												<h2>RMB {{ item.buy_it_now_price }}</h2>
+												<p>{{ item.goods_name }}</p>
+												<a href="/goods/{{ item.id }}" class="btn btn-default add-to-cart"><i class="fa fa-smile-o"></i>查看商品</a>
+											</div>
+										</div>
+								</div>
+							</div>
+						</div>
+                            {% endfor %}
+
+					</div><!--features_items-->
+				</div>
+			</div>
+		</div>
 		<div class="common-modal modal fade" id="common-Modal1" tabindex="-1" role="dialog" aria-hidden="true">
 			<div class="modal-content">
 				<ul class="list-inline item-details">
-					<li><a href="http://themifycloud.com">Ecommerce templates</a></li>
-					<li><a href="http://themescloud.org">Ecommerce themes</a></li>
+					<li><a href="http://themifycloud.com">ThemifyCloud</a></li>
+					<li><a href="http://themescloud.org">ThemesCloud</a></li>
 				</ul>
 			</div>
 		</div>
-    </div><!--/#contact-page-->
+	</section>
 
     <script src="/js/jquery.js"></script>
 	<script src="/js/bootstrap.min.js"></script>

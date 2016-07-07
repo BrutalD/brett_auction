@@ -66,10 +66,11 @@
 						<div class="mainmenu pull-left">
 							<ul class="nav navbar-nav collapse navbar-collapse">
 								<li><a href="/market">商店</a></li>
-                                <li><a href="/upload/" class="active">上传商品</a></li>
+
+                                <li><a href="/upload/">上传商品</a></li>
                                 <li><a href="/orders/">订单</a></li>
                                 <li><a href="/cart/">购物车</a></li>
-                                <li><a href="/people/{{ current_user }}" >个人中心</a></li>
+                                <li><a href="/people/{{ current_user }}" class="active">个人中心</a></li>
 							</ul>
 						</div>
 					</div>
@@ -88,59 +89,67 @@
     		<div class="row">
 	    		<div class="col-sm-8">
 	    			<div class="contact-form">
-	    				<h2 class="title text-center">商品资料</h2>
+	    				<h2 class="title text-center">订单资料</h2>
 	    				<div class="status alert alert-success" style="display: none"></div>
-				    	<form id="main-user-profile-form" class="contact-form row" name="user-profile-form" method="post" enctype="multipart/form-data"> {% csrf_token %}
-				            <div class="form-group col-md-8">
-				                <input type="text" name="goods_name" class="form-control"  placeholder="商品名称" required="required">
-				            </div>
-                            <div class="form-group col-md-4">
-				                <input type="text" name="remaining_number" class="form-control"  placeholder="商品数量" required="required">
-				            </div>
-				            <div class="form-group col-md-12">
-                                <textarea name="description" id="message" required="required" class="form-control" rows="8" placeholder="商品描述"></textarea>
-				            </div>
-				            <div class="form-group col-md-6">
-				                <input type="text" name="start_bid" class="form-control"  placeholder="起拍价">
-				            </div>
-                            <div class="form-group col-md-6">
-				                <input type="text" name="buy_it_now_price" class="form-control"  placeholder="一口价">
-				            </div>
-                            <div class="form-group col-md-6">
-                                <select id="id_category" name="category">
-                                    <option value="" selected="selected">---------</option>
-                                    {% for category in categories %}
-                                    <option value={{ category }}>{{ category }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label>图片描述</label>
-                                <input type="file" name="image_description" required="required">
-                            </div>
-
-				            <!--<div class="form-group col-md-12">
-				                <textarea name="message" id="message" required="required" class="form-control" rows="8" placeholder="自我介绍"></textarea>
-				            </div>-->
-				            <div class="form-group col-md-12">
-				                <input type="submit" name="submit" class="btn btn-primary pull-right" value="提交">
-				            </div>
-				        </form>
+                        <div>
+                            <p>订单号码：{{ order.id }}</p>
+                        </div>
+                        <div>
+                            <p>买家：{{ order.user }}</p>
+                        </div>
+                        <div>
+                            <p>卖家: {{ order.goods.vendor }}</p>
+                        </div>
+                        <div>
+                            <p>物品: {{ order.goods.goods_name }}</p>
+                        </div>
+                        <div>
+                            <p>数量: {{ order.number }}</p>
+                        </div>
+                        <div>
+                            <p>总价: {% widthratio order.number 1 order.goods.buy_it_now_price %}</p>
+                        </div>
+                        <div>
+                            <p>支付方式：货到付款</p>
+                        </div>
 	    			</div>
 	    		</div>
 	    		<div class="col-sm-4">
 	    			<div class="contact-info">
-	    				<h2 class="title text-center">用户资料</h2>
-	    				<address>
-	    					<p>用户名：{{ current_user.user_name }}</p>
-							<p>电子邮箱：{{ current_user.email }}</p>
-							<p>手机号码：{{ current_user.phone }}</p>
-							<p>真实姓名：{{ current_user.real_name }}</p>
-							<p>证件号：{{ current_user.real_id }}</p>
-	    				</address>
+	    				<h2 class="title text-center">配送地址</h2>
+                        <form method="post"> {% csrf_token %}
+                            <select id="id_address" name="address">
+                                <option value="" selected="selected">---------</option>
+                                {% for address in address_list %}
+                                <option value={{ address }}>{{ address }}</option>
+                                {% endfor %}
+                            </select>
+                            <input type="submit" name="submit" class="btn btn-primary pull-right" value="提交">
+                        </form>
 	    			</div>
     			</div>
 	    	</div>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="contact-info">
+                        <h2 class="title text-center">收货地址</h2>
+                        {% for address in current_user.deliveryaddress_set.all %}
+                        <address>
+                            <p>收件人：{{ address.delivery_name }}</p>
+                            <p>联系电话：{{ address.delivery_phone }}</p>
+                            <p>邮编: {{ address.postcode }}</p>
+                            <p>地址：{{ address.address }}</p>
+                        </address>
+                        {% endfor %}
+                        <div class="form-group col-md-12">
+                            <a href="/newaddress/">
+                                <input type="button"
+                                   onclick="window.location.href('/newaddress/')" name="new-address" class="btn btn-primary pull-right" value="新地址">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
     	</div>
 		<div class="common-modal modal fade" id="common-Modal1" tabindex="-1" role="dialog" aria-hidden="true">
 			<div class="modal-content">

@@ -19,11 +19,15 @@ class User(models.Model):
         (FEMALE, 'Female'),
     )
     gender = models.CharField(max_length=20, choices=GENDER, default=MALE)
-    portrait = models.ImageField(upload_to='user_portrait/')
+    portrait = models.ImageField(upload_to='user_portrait/', blank=True, null=True)
     birthday = models.DateField(blank=True, null=True)
     phone = models.CharField(max_length=30)
     # 信用等级
     credit = models.FloatField(default=0)
+
+    def __str__(self):
+        return self.user_name
+
 
 
 class DeliveryAddress(models.Model):
@@ -34,13 +38,21 @@ class DeliveryAddress(models.Model):
     address = models.CharField(max_length=255)
     postcode = models.CharField(max_length=30)
 
+    def __str__(self):
+        return '%s\n%s\n%s' % (self.delivery_name, self.delivery_phone, self.address)
+
+class Category(models.Model):
+    category = models.CharField(max_length=20, primary_key=True)
+
+    def __str__(self):
+        return self.category
 
 class Goods(models.Model):
-    vendor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='vendor')
+    vendor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='vendor_goods')
     remaining_number = models.PositiveIntegerField()
     goods_name = models.CharField(max_length=255)
     description = models.TextField()
-    category = models.ForeignKey(Category, on_delete=None, related_name='goods_category')
+    category = models.ForeignKey(Category, on_delete=None, related_name='category_goods')
     # category = models.CharField(max_length=255, blank=True, null=True)
 
     ON_SALE = 'ON'
@@ -62,7 +74,7 @@ class Goods(models.Model):
     sale_type = models.CharField(max_length=30, choices=SALE_TYPE, blank=True, null=True)
     start_bid = models.SmallIntegerField(blank=True, null=True)
     current_bid = models.SmallIntegerField(blank=True, null=True)
-    current_bid_buyer = models.ForeignKey(User, blank=True, null=True, related_name='current_bid_buyer')
+    current_bid_buyer = models.ForeignKey(User, blank=True, null=True, related_name='bid_goods')
     buy_it_now_price = models.SmallIntegerField(blank=True, null=True)
     # 商品可以有起拍价和一口价，可以只有两个中的一个，但至少要有一个。
     # 根据商品的各自价格，将商品分为仅拍卖、拍卖或一口价、仅一口价三种。
@@ -73,6 +85,9 @@ class Goods(models.Model):
     image_description_3 = models.ImageField(upload_to='goods_image/%Y/%m/%d', blank=True, null=True)
     image_description_4 = models.ImageField(upload_to='goods_image/%Y/%m/%d', blank=True, null=True)
     image_description_5 = models.ImageField(upload_to='goods_image/%Y/%m/%d', blank=True, null=True)
+
+    def __str__(self):
+        return self.goods_name
 
 
 class AuctionBid(models.Model):
@@ -109,6 +124,3 @@ class Order(models.Model):
     )
     status = models.CharField(max_length=20, choices=ORDER_STATUS, default=UNPAID)
 
-
-class Category(models.Model):
-    category = models.CharField(max_length=20, primary_key=True)

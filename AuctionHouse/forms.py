@@ -5,23 +5,22 @@ from .models import *
 class RegisterUserForm(ModelForm):
     class Meta:
         model = User
-        fields = ['user_name', 'password', 'email', 'phone']
+        fields = ['user_name', 'password', 'email', 'real_id', 'real_name']
         labels = {'user_name': '用户名',
                   'password': '密码',
-                  'email': '邮箱',
-                  'phone': '手机'}
+                  'email': '邮箱',}
         widgets = {'password': PasswordInput}
 
 class LoginUserForm(Form):
-    name_or_email = CharField(label='用户名/邮箱', max_length=30)
-    password = CharField(label='密码', max_length=30, widget=PasswordInput)
+    login_name_email = CharField(label='用户名/邮箱', max_length=30)
+    login_password = CharField(label='密码', max_length=30, widget=PasswordInput)
 
 
 class UpdateUserForm(ModelForm):
     class Meta:
         model = User
         fields = ['password', 'email', 'phone', 'real_name', 'real_id',
-                  'gender', 'portrait', 'birthday']
+                  'gender',]
         labels = {'user_name': '用户名',
                   'password': '密码',
                   'email': '邮箱',
@@ -32,6 +31,7 @@ class UpdateUserForm(ModelForm):
                   'portrait': '头像',
                   'birthday': '生日'}
         widgets = {'password': PasswordInput}
+
 #
 # class UserForm(forms.Form):
 #     user_name = forms.CharField(label='用户名', max_length=30)

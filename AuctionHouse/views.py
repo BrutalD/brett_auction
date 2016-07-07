@@ -13,73 +13,97 @@ def pay(request):
     pass
 
 def index(request):
-    user_name = get_current_user(request)
+    #user_name = get_current_user(request)
+    # categories = Category.objects.all()
     # return render(request, 'index.html', {'user_name':user_name})
-    return HttpResponseRedirect('/market/')
+    return market(request)
 
 # 用户注册
-def register(request):
-    # print('POST')
+# def register(request):
+#     # print('POST')
+#     current_user = get_current_user(request)
+#     try:
+#         user = User.objects.get(user_name=current_user)
+#     except ObjectDoesNotExist as e:
+#         user = None
+#
+#     if request.method == 'POST':
+#         if request.POST.has_key('login'):
+#             user_form = RegisterUserForm(request.POST)
+#             if user_form.is_valid():
+#                 user_form.save()
+#                 return HttpResponseRedirect('/market')
+#         else:
+#
+#
+#     return render(request,
+#                   'login.html',
+#                   {'current_user': user})
+
+def login_register(request):
+
+    current_user = get_current_user(request)
+    try:
+        user_obj = User.objects.get(user_name=current_user)
+    except ObjectDoesNotExist as e:
+        user_obj = None
+
+    context = {'current_user': user_obj}
 
     if request.method == 'POST':
-        user_form = RegisterUserForm(request.POST)
-        if user_form.is_valid():
-            new_user = User(**user_form.cleaned_data)
-            new_user.save()
-            return render(request,
-                          'register/success.html',
-                          {'username':user_form.cleaned_data['user_name']})
-    else:
-        user_form = RegisterUserForm()
-    return render(request,
-                  'register/register.html',
-                  {'uf':user_form})
-
-def login(request):
-    if request.method == 'POST':
-        user_form = LoginUserForm(request.POST)
-        if user_form.is_valid():
-            name_or_email = user_form.cleaned_data['name_or_email']
-            password = user_form.cleaned_data['password']
-            user = User.objects.filter(
-                Q(user_name=name_or_email) | Q(email=name_or_email),
-                Q(password=password)
-            )
-            if user:
-                # print("User Confirmed")
-                # print(user)
-                response = HttpResponseRedirect('/',
-                                                {'username':user[0].user_name})
-                response.set_cookie('user_name', user[0].user_name, 3600)
-                return response
-                # return render_to_response('login/success.html',
-                #                           {'username':user[0].user_name})
+        if 'login' in request.POST:
+            user_form = LoginUserForm(request.POST)
+            if user_form.is_valid():
+                name_or_email = user_form.cleaned_data['login_name_email']
+                password = user_form.cleaned_data['login_password']
+                try:
+                    user = User.objects.get(
+                    Q(user_name=name_or_email) | Q(email=name_or_email),
+                    Q(password=password)
+                    )
+                    response = HttpResponseRedirect('/')
+                    response.set_cookie('user_name', user.user_name, 3600)
+                    return response
+                except ObjectDoesNotExist as e:
+                    context['error_msg'] = '无效的用户名或密码'
+                    return render(request, 'login.html',context)
             else:
-                return HttpResponseRedirect('/login/')
-    else:
-        user_form = LoginUserForm()
-    return render(request,
-                  'login/login.html',
-                 {'uf':user_form})
+                context['error_msg'] = '数据格式错误'
+                return render(request, 'login.html', context)
+        else:
+            # 注册功能
+            user_form = RegisterUserForm(request.POST)
+            if user_form.is_valid():
+                user_form.save()
 
-def user(request, user_name):
+                response = HttpResponseRedirect('/')
+                response.set_cookie('user_name', user_form.user_name, 3600)
+                return response
+            else:
+                context['register_error_msg'] = '用户名/邮箱已注册'
+                return render(request, 'login.html', context)
+    return render(request, 'login.html', context)
+
+
+def user(request, user_name=''):
 
     # 获取当前登陆的用户
-    try:
-        current_user = get_current_user(request)
-    except ObjectDoesNotExist as e:
-        current_user = ''
+    current_user = get_current_user(request)
+    if not current_user or (not user_name):
+        return HttpResponseRedirect('/login/')
+
+
 
     # 如果是当前登陆的用户在查看自身的状态
     if current_user == user_name:
         user = User.objects.get(user_name=current_user)
         if request.method == 'POST':
-            user_form = UpdateUserForm(request.POST, request.FILES, instance=user)
-            user_form.save()
-        else:
-            user_form = UpdateUserForm(instance=user)
-        return render('people/self.html',
-                      {'uf': user_form})
+            user_form = UpdateUserForm(request.POST, instance=user)
+            if user_form.is_valid():
+                user_form.save()
+        return render(request,
+                      'user_profile.html',
+                      {'current_user': user})
     else:
         try:
             user = User.objects.get(user_name=user_name)
@@ -123,18 +147,19 @@ def cart(request):
     return render(request, 'people/cart.html', context)
 
 def market(request):
+    # 展示加上超链接就足够
     current_user = get_current_user(request)
     categories = Category.objects.all()
     # to fill
     context = {'current_user': current_user,
                      'categories': categories}
-    return render(request, 'market/index.html',context)
+    return render(request, 'index.html',context)
 
 def cate_market(request, category_name):
     current_user = get_current_user(request)
     category_obj = Category.objects.get(pk=category_name)
     context = {'current_user': current_user,
-               'categori': category_obj}
+               'category': category_obj}
     return render(request, 'market/category.html', context)
 
 def goods_upload(request):
@@ -289,3 +314,6 @@ def address(request):
     context = {'address_list': address_list,
                'current_user': current_user}
     return render(request, 'people/address.html', context)
+
+def new_address(request):
+    pass
